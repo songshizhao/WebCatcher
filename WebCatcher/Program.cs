@@ -15,6 +15,9 @@ namespace WebCatcher
 
             //HttpWebResponse response = request.GetResponse() as HttpWebResponse;
             
+
+
+
             Console.WriteLine("end");
             Console.Read();
         }
