@@ -1,5 +1,8 @@
-﻿using System;
+﻿using HtmlAgilityPack;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -13,9 +16,10 @@ namespace WebCatcher
         {
             Console.WriteLine("start");
 
-            //HttpWebResponse response = request.GetResponse() as HttpWebResponse;
-            
+            var data=GetHtml("https://www.9ku.com/");
 
+
+            Getc(data);
 
 
             Console.WriteLine("end");
@@ -23,18 +27,90 @@ namespace WebCatcher
         }
 
 
-        internal void GetHtmlAfterJs(string url, string encode) {
+        static string GetHtml(string url, string encode="utf-8") {
+
+            HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
+            //设置访问页面的标头
+            request.Method = "get";
+            request.Accept = "";
+            request.ContentType = "";
+            request.UserAgent = "";
+
+            HttpWebResponse response = request.GetResponse() as HttpWebResponse;
+
+            using (StreamReader stream = new StreamReader(response.GetResponseStream()))
+            {
+
+                //请求下来的HTML页面
+                String data = stream.ReadToEnd();
+
+                return data;
+                
+
+            }
 
 
 
 
+            
 
+
+        }
+
+
+        static List<string> Getc(string data)
+        {
+
+
+            Hashtable hashtable = new Hashtable();// 网页中元素对象
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(data);//解析
+
+
+
+
+            //""[@class='songName']
+            var token = htmlDoc.DocumentNode.SelectNodes("//a");
+
+            List<String> li = new List<string>();
+
+            //遍历其中符合条件的数据
+            foreach (HtmlNode row in token)
+            {
+                var link = row.GetAttributeValue("href", "");
+
+
+                if (link!="")
+                {
+
+                    var classname=row.GetAttributeValue("class", "");
+                    if (classname == "songName ")
+                    {
+                        li.Add(link);
+                        Console.WriteLine(link);
+                        //Console.WriteLine($"{classname}:link");
+                    }
+
+
+                }
+               
+                
+
+            }
+
+            return li;
 
 
         }
 
 
 
+
+
+        //如果请求下来的页面是zip格式
+        //Stream ResStream = new System.IO.Compression.GZipStream(response.GetResponseStream(), System.IO.Compression.CompressionMode.Decompress);
+        //Encoding encoding = Encoding.GetEncoding(“utf - 8”);
+        //StreamReader streamReader = new StreamReader(ResStream, encoding);
 
 
         //internal void GetHtmlAfterJs(string url, string encode)
