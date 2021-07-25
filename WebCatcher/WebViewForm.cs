@@ -17,7 +17,8 @@ namespace WebCatcher
         public EventHandler<string> OnLoadFinished;
 
         public static bool IsLoading { get; set; } = true;
-
+        
+        public double TimeWaited { get; set; }
         public WebBrowser _browser { get; set; } = new WebBrowser();
 
         public WebViewForm()

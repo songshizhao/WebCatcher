@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WinApi.User32;
@@ -15,7 +16,7 @@ namespace WebCatcher
 {
     class Program
     {
-        
+        static double DealyCount = 0;
         static List<string> _sourceLinkList = new List<string>();
         //private static EOBrowser _webViewForm = new EOBrowser();
         //private static WebViewForm _webViewForm = new WebViewForm();
@@ -60,23 +61,19 @@ namespace WebCatcher
                             var src = row.GetAttributeValue("src", "");
                             if (src != "")
                             {
-                                if (_sourceLinkList.Contains(src))
+                                if (!_sourceLinkList.Contains(src))
                                 {
-                                    Console.Write(".");
-                                }
-                                else
-                                {
+                                    //Console.Write(".");
                                     _sourceLinkList.Add(src);
                                     Console.WriteLine(src);
-                                    WebViewForm.IsLoading = false;
 
-                                    _webViewForm.Dispose();
-                                    _webViewForm.Close();
-
-                                    
                                 }
-                                
-                                
+ 
+
+                                WebViewForm.IsLoading = false;
+                                _webViewForm.Dispose();
+                                _webViewForm.Close();
+                                DealyCount = 0;
                             }
 
                         }
@@ -85,19 +82,57 @@ namespace WebCatcher
                 _webViewForm.GetHtmlAfterJs(url);
                 
                 _webViewForm.ShowDialog();
-                
 
-                User32Methods.ShowWindow(_webViewForm.Handle, ShowWindowCommands.SW_HIDE);
+
+                //User32Methods.ShowWindow(_webViewForm.Handle, ShowWindowCommands.SW_HIDE);
+
+
+
+
+
+
+
+
 
                 do
                 {
                     Task.Delay(100);
+                    DealyCount += 1;
+                    if (DealyCount>=80)
+                    {
+                        DealyCount = 0;
+                        break;
+                    }
+                    //if (_webViewForm.TimeWaited>=100)
+                    //{
+                    //    WebViewForm.IsLoading = false;
+                    //    _webViewForm.Dispose();
+                    //    _webViewForm.Close();
+                    //    break;
+                    //}
+                    //else
+                    //{
+                    //    _webViewForm.TimeWaited += 1;
+                    //    Task.Delay(100);
+                    //}
+                    
                 }
                 while (WebViewForm.IsLoading == true);
 
             }
 
-            Console.WriteLine("end");
+
+
+            WriteObject2File(_sourceLinkList);
+
+
+
+
+
+
+
+            Console.WriteLine("End");
+            
             Console.ReadKey();
 
         }
@@ -179,6 +214,55 @@ namespace WebCatcher
 
 
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+        public void WriteString2File(string str)
+        {
+            using (StreamWriter sw = new StreamWriter("names.txt"))
+            {
+
+                sw.Write(str);
+            }
+
+        }
+
+
+        public static void WriteObject2File<T>(T obj)
+        {
+
+
+
+            
+
+
+
+            string filePath = Directory.GetCurrentDirectory() + "\\"  + "r.json";
+
+            var str = JsonSerializer.Serialize(obj);
+
+            File.WriteAllText(filePath, str);
+            //if (File.Exists(filePath))
+            //File.Delete(filePath);
+
+            //File.CreateText(filePath);
+            //using (StreamWriter sw = new StreamWriter(filePath))
+            //{
+            //    var str = JsonSerializer.Serialize(obj);
+            //    sw.Write(str);
+            //}
+        }
+
 
 
 
